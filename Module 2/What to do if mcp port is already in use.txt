@@ -1,0 +1,33 @@
+In the next lesson we will start to use mcp servers. We start with AgentSmithers' x64dbg mcp server.
+
+However, it appears that Agentsmithers, the author of one of the x64dbg MCP server plugins, recently updated it to use port 50300. Unfortunately, this caused it to fail on some PCs because that port is already being used by another process or service. The good news is that the fix is straightforward: simply identify and terminate the process or service using that port, and the MCP server will work again. I’ve tested this myself and can confirm that it works.
+
+Below is how you can kill that port, or any port:
+
+1. Find out what process (PID) is using that port:
+
+Open a cmd terminal as Administrator (you need admin to kill processes)
+
+then type:
+
+netstat -ano | findstr 50300
+
+you might see something like this:
+
+TCP    0.0.0.0:50300    0.0.0.0:0   LISTENING    2248
+
+Take note of the PID: 2248
+
+2. Find out what process has that PID:
+
+tasklist /fi "PID eq 2248"
+
+You might see something like this:
+
+svchost.exe    2248  Services   0     21,092 K
+
+3. Kill that process (make sure your cmd is opened as administrator):
+
+taskkill /PID 2248 /F 
+
+4. Uninstall the program (process) that is using port 50300, or, remove it from the startup apps in Task Manager. The name of the process is sometimes listed in step 2.

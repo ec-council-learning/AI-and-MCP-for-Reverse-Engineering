@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "mcp_frida": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "http://127.0.0.1:9888/mcp/",
+        "--allow-http"
+    ]
+    }
+  }
+}

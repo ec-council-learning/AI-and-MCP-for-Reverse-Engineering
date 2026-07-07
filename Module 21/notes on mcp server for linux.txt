@@ -1,0 +1,34 @@
+Download cutter mcp from:
+
+https://github.com/ap425q/CutterMCP
+
+unzip and copy the plugin into Cutter's plugin/python folder.
+
+When Cutter starts, the plugin listens on port 8000. But it is localhost, we 
+need mcp-proxy to bridge it to 0.0.0.0:57788
+
+Create a virtual environment for python, then:
+
+pip install mcp-proxy
+pip install fastmcp
+
+Then, run mcp-proxy:
+
+mcp-proxy --host=0.0.0.0 --port=57788 -- python bridge_mcp_cutter.py
+
+In window's Claude, outside the virtual machine, in claude_desktop_config.json:
+
+{
+ "mcpServers": {
+    "mcp_cutter": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "http://127.0.0.1:57788/sse",
+        "--allow-http"
+      ]
+    }
+  }
+}
+

@@ -1,0 +1,19 @@
+Ghidra - Exposes Ghidra’s core functionality to LLMs for autonomous reverse engineering via MCP.
+Ida Pro - Enables vibe reversing in IDA Pro through MCP.
+JADX-AI - Integrates the JADX decompiler with MCP for AI-powered static analysis and live RE.
+ReVa - Model-agnostic AI assistant for advanced RE within environments like Ghidra.
+GhidrAssist - Enables AI tools to use Ghidra’s capabilities via a standardized MCP API.
+Apktool - Provides live reverse engineering support using Apktool with LLMs like Claude.
+JADX - Connects the JADX decompiler with local LLMs via MCP for Android app analysis.
+Binary Ninja - Integrates Binary Ninja with LLMs through MCP for enhanced RE workflows.
+Jadx - Exposes the Jadx API over HTTP for live RE automation.
+Awsome Kali - Provides a suite of MCP servers for RE and security testing in Kali Linux.
+Ida Pro Server - Allows AI assistants to interact with IDA Pro for RE and binary analysis.
+Radare2 - Connects radare2 with AI assistants via MCP for binary inspection.
+IDA Pro - Direct interaction between LLMs and IDA Pro for binary analysis tasks.
+Cutter - Exposes Cutter functionality through MCP for automated reverse engineering.
+Jebmcp - Integrates JEB with MCP for streamlined RE workflows.
+BinAssist - Makes Binary Ninja accessible to LLMs via MCP.
+Apktool - Adds APK reverse engineering with Gemini CLI integration via MCP.
+Awesome-Security - A curated set of MCP servers for RE, threat hunting, and malware analysis.
+Ghidra - Secondary listing for Ghidra enabling AI-assisted binary analysis via MCP.

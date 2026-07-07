@@ -1,0 +1,22 @@
+Upload the mcp_automate_server.py to your preferred LLM chat, eg:
+Claude Desktop, or, ChatGPT, then paste the prompt below into the chatbox:
+
+[ attach/upload file mcp_automate_server.py]
+
+Refer to file. I am trying to implement virt_query(add). The API is described here:
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/memory-control/ 
+
+The original API returns MemPage whose structure is: 
+
+class MemPage(BaseModel):
+    base_address: int
+    allocation_base: int
+    allocation_protect: int
+    partition_id: int
+    region_size: int
+    state: int
+    protect: int
+    type: int
+    info: str
+
+Use the function read_str_from_memory as a guide on how to check the addr parameter and how to format the return type as dictionary. Also insert the proper docstring.

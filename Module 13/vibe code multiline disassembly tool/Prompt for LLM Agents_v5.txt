@@ -1,0 +1,224 @@
+Upload the mcp_automate_server.py to your preferred LLM chat, eg:
+Claude Desktop, or, ChatGPT, then paste the appropriate prompt below into the chatbox:
+
+
+(1) Implementing virt_query mcp tool:
+````````````````````````````````````
+[ attach/upload file mcp_automate_server.py]
+Refer to file. I am trying to implement virt_query(add). The API is described here:
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/memory-control/ 
+
+The original API returns MemPage whose structure is: 
+
+class MemPage(BaseModel):
+    base_address: int
+    allocation_base: int
+    allocation_protect: int
+    partition_id: int
+    region_size: int
+    state: int
+    protect: int
+    type: int
+    info: str
+
+Use the function read_str_from_memory as a guide on how to check the addr parameter and how to format the return type as dictionary. Also insert the proper docstring.
+
+
+(2) Implementing memmap mcp tool:
+````````````````````````````````
+[ attach/upload file mcp_automate_server.py]
+Refer to file. I am trying to implement memmap() mcp tool.
+
+The API is described here:
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/memory-control/
+
+The original API returns MemPage whose structure is:
+
+class MemPage(BaseModel): 
+   base_address: int 
+   allocation_base: int 
+   allocation_protect: int 
+   partition_id: int 
+   region_size: int 
+   state: int 
+   protect: int 
+   type: int 
+   info: str
+
+Use the function read_str_from_memory and virt_query as a guides on how to implement the function and how to format the return type as dictionary. Also insert the proper docstring. Assume debugger will always be initialized. If unsure of anything or need more information, ask me.
+
+
+(3) Implementing the write memory mcp tool:
+``````````````````````````````````````````
+[ attach/upload file mcp_automate_server.py]
+Refer to file. I am trying to implement write_memory(addr, data) mcp tool.
+It writes data to the debugee's memory
+
+The API is described here:
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/memory-control/
+
+addr is an int:	The address to write to
+data is bytes:	The data to be written at the addr
+
+The api returns bool to indicate Success.
+
+Use the following functions from the file, as guides on how to implement the function:
+
+ read_str_from_memory
+ virt_query
+ memmap
+
+Also insert the proper docstring. Assume debugger will always be initialized. If unsure of anything or need more information, ask me.
+
+(4) Implementing the memset mcp tool:
+``````````````````````````````````````````
+[ attach/upload file mcp_automate_server.py]
+Refer to file. I am trying to implement memset(addr, byte_val, size) mcp tool.
+It is supposed to set memory in the debugee's address space to a specified value.
+
+The API is described here:
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/memory-control/
+
+addr is an int:	The address to set memory at
+byte_val is an int: The value to set memory to
+size is an int: The number of bytes to set
+
+The api returns bool to indicate Success.
+
+Use the following functions from the file, as guides on how to implement the function:
+
+ read_str_from_memory
+ virt_query
+ memmap
+ write_memory
+
+Also insert the proper docstring. Assume debugger will always be initialized. If unsure of anything or need more information, ask me.
+
+(5) Implementing the disassemble_at tool:
+``````````````````````````````````````````
+[ attach/upload file mcp_automate_server.py]
+Refer to file. I am trying to implement the disassemble_at(addr) mcp tool.
+It is supposed to disassemble a single instruction at the specified address
+
+The API is described here:
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/assembler-disassembler/
+
+addr is an int:	The address to disassemble at
+
+The api returns Instruction or None. 
+
+The Instruction structure is:
+
+class Instruction(BaseModel):
+    instruction: str
+    argcount: int
+    instr_size: int
+    type: DisasmInstrType
+    arg: list[InstructionArg]
+
+The DisasmInstrType is:
+
+class DisasmInstrType(IntEnum):
+    Normal = 0
+    Branch = 1
+    Stack = 2
+
+
+The DisasmArgType is:
+
+class DisasmArgType(IntEnum):
+    Normal = 0
+    Memory = 1
+
+The InstructionArg is:
+
+class InstructionArg(BaseModel):
+    mnemonic: str
+    type: DisasmArgType
+    segment: SegmentReg
+    constant: int
+    value: int
+    memvalue: int
+
+The SegmentReg is:
+
+class SegmentReg(IntEnum):
+    SegDefault = 0
+    SegEs = 1
+    SegDs = 2
+    SegFs = 3
+    SegGs = 4
+    SegCs = 5
+    SegSs = 6
+
+
+Use the following functions from the file, as guides on how to implement the function:
+
+ read_str_from_memory
+ virt_query
+ memmap
+ write_memory
+ memset
+
+ According to the API docs in the url above, an example usage is:
+
+print('[+] Disassembling instructions')
+ i = rip
+for _ in range(6):
+    ins = client.disassemble_at(i)
+    print(f'\t{i:016X}: {ins.instruction}')
+    i = i + ins.instr_size
+
+and the example output is:
+
+[+] Disassembling instructions
+        00007FF962D4C135: mov rax, 0x7FF961A698C0
+        00007FF962D4C13F: mov rdx, 0x401000
+        00007FF962D4C146: mov rcx, 0x7FF961A50000
+        00007FF962D4C150: lea rcx, ds:[rcx*2+0x04]
+        00007FF962D4C158: mov rbx, qword ptr gs:[0x0000000000000000]
+        00007FF962D4C161: mov rdi, 0x21CBEDC0000
+
+However, I want this mcp tool to work with 32-bit programs as well, not only 64-bit, so you may need to ensure the output can cater
+for both 32-bit and also 64-bit addresses and registers.
+
+Also insert the proper docstring. Assume debugger will always be initialized. If unsure of anything or need more information, ask me.
+
+
+(5) Implementing the multi-line disassemble tool:
+`````````````````````````````````````````````````
+The API is described here:  
+
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/assembler-disassembler/
+
+Currently your solution for disassemble_at, disassembles only one line. 
+Try to disassembly multiple lines, something like this:
+
+ i = rip
+for _ in range(6):
+    ins = client.disassemble_at(i)
+    print(f'\t{i:016X}: {ins.instruction}')
+    i = i + ins.instr_size
+
+and the example output is:
+
+[+] Disassembling instructions
+        00007FF962D4C135: mov rax, 0x7FF961A698C0
+        00007FF962D4C13F: mov rdx, 0x401000
+        00007FF962D4C146: mov rcx, 0x7FF961A50000
+        00007FF962D4C150: lea rcx, ds:[rcx*2+0x04]
+        00007FF962D4C158: mov rbx, qword ptr gs:[0x0000000000000000]
+        00007FF962D4C161: mov rdi, 0x21CBEDC0000
+
+Create a new function called disassemble_smart(addr, num_lines) -> dict
+
+where num_lines is an integer of the number of lines to disassemble.
+
+The function should automatically detect proper instruction boundaries to ensure accurate disassembly even when the starting address might be in the middle of an instruction, and be able to automatically make proper alignment adjustments and must 
+work with both 32-bit and 64-bit programs.
+
+You may rename the function or the parameter names, or, even add more parameters as you see fit.
+If unsure of anything or need more information, ask me.
+
+
+

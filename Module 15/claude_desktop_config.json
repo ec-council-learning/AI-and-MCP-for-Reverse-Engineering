@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "mcp_automate": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "http://127.0.0.1:9628/sse",
+        "--allow-http"
+      ]
+    }
+  }
+}

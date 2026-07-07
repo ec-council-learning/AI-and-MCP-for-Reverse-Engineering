@@ -1,0 +1,1210 @@
+Upload the mcp_automate_server.py to your preferred LLM chat, eg:
+Claude Desktop, or, ChatGPT, then paste the appropriate prompt below into the chatbox:
+
+
+(1) Implementing virt_query mcp tool:
+````````````````````````````````````
+[ attach/upload file mcp_automate_server.py]
+Refer to file. I am trying to implement virt_query(add). The API is described here:
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/memory-control/ 
+
+The original API returns MemPage whose structure is: 
+
+class MemPage(BaseModel):
+    base_address: int
+    allocation_base: int
+    allocation_protect: int
+    partition_id: int
+    region_size: int
+    state: int
+    protect: int
+    type: int
+    info: str
+
+Use the function read_str_from_memory as a guide on how to check the addr parameter and how to format the return type as dictionary. Also insert the proper docstring.
+
+
+(2) Implementing memmap mcp tool:
+````````````````````````````````
+[ attach/upload file mcp_automate_server.py]
+Refer to file. I am trying to implement memmap() mcp tool.
+
+The API is described here:
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/memory-control/
+
+The original API returns MemPage whose structure is:
+
+class MemPage(BaseModel): 
+   base_address: int 
+   allocation_base: int 
+   allocation_protect: int 
+   partition_id: int 
+   region_size: int 
+   state: int 
+   protect: int 
+   type: int 
+   info: str
+
+Use the function read_str_from_memory and virt_query as a guides on how to implement the function and how to format the return type as dictionary. Also insert the proper docstring. Assume debugger will always be initialized. If unsure of anything or need more information, ask me.
+
+
+(3) Implementing the write memory mcp tool:
+``````````````````````````````````````````
+[ attach/upload file mcp_automate_server.py]
+Refer to file. I am trying to implement write_memory(addr, data) mcp tool.
+It writes data to the debugee's memory
+
+The API is described here:
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/memory-control/
+
+addr is an int:	The address to write to
+data is bytes:	The data to be written at the addr
+
+The api returns bool to indicate Success.
+
+Use the following functions from the file, as guides on how to implement the function:
+
+ read_str_from_memory
+ virt_query
+ memmap
+
+Also insert the proper docstring. Assume debugger will always be initialized. If unsure of anything or need more information, ask me.
+
+(4) Implementing the memset mcp tool:
+``````````````````````````````````````````
+[ attach/upload file mcp_automate_server.py]
+Refer to file. I am trying to implement memset(addr, byte_val, size) mcp tool.
+It is supposed to set memory in the debugee's address space to a specified value.
+
+The API is described here:
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/memory-control/
+
+addr is an int:	The address to set memory at
+byte_val is an int: The value to set memory to
+size is an int: The number of bytes to set
+
+The api returns bool to indicate Success.
+
+Use the following functions from the file, as guides on how to implement the function:
+
+ read_str_from_memory
+ virt_query
+ memmap
+ write_memory
+
+Also insert the proper docstring. Assume debugger will always be initialized. If unsure of anything or need more information, ask me.
+
+(5) Implementing the disassemble_at tool:
+``````````````````````````````````````````
+[ attach/upload file mcp_automate_server.py]
+Refer to file. I am trying to implement the disassemble_at(addr) mcp tool.
+It is supposed to disassemble a single instruction at the specified address
+
+The API is described here:
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/assembler-disassembler/
+
+addr is an int:	The address to disassemble at
+
+The api returns Instruction or None. 
+
+The Instruction structure is:
+
+class Instruction(BaseModel):
+    instruction: str
+    argcount: int
+    instr_size: int
+    type: DisasmInstrType
+    arg: list[InstructionArg]
+
+The DisasmInstrType is:
+
+class DisasmInstrType(IntEnum):
+    Normal = 0
+    Branch = 1
+    Stack = 2
+
+
+The DisasmArgType is:
+
+class DisasmArgType(IntEnum):
+    Normal = 0
+    Memory = 1
+
+The InstructionArg is:
+
+class InstructionArg(BaseModel):
+    mnemonic: str
+    type: DisasmArgType
+    segment: SegmentReg
+    constant: int
+    value: int
+    memvalue: int
+
+The SegmentReg is:
+
+class SegmentReg(IntEnum):
+    SegDefault = 0
+    SegEs = 1
+    SegDs = 2
+    SegFs = 3
+    SegGs = 4
+    SegCs = 5
+    SegSs = 6
+
+
+Use the following functions from the file, as guides on how to implement the function:
+
+ read_str_from_memory
+ virt_query
+ memmap
+ write_memory
+ memset
+
+ According to the API docs in the url above, an example usage is:
+
+print('[+] Disassembling instructions')
+ i = rip
+for _ in range(6):
+    ins = client.disassemble_at(i)
+    print(f'\t{i:016X}: {ins.instruction}')
+    i = i + ins.instr_size
+
+and the example output is:
+
+[+] Disassembling instructions
+        00007FF962D4C135: mov rax, 0x7FF961A698C0
+        00007FF962D4C13F: mov rdx, 0x401000
+        00007FF962D4C146: mov rcx, 0x7FF961A50000
+        00007FF962D4C150: lea rcx, ds:[rcx*2+0x04]
+        00007FF962D4C158: mov rbx, qword ptr gs:[0x0000000000000000]
+        00007FF962D4C161: mov rdi, 0x21CBEDC0000
+
+However, I want this mcp tool to work with 32-bit programs as well, not only 64-bit, so you may need to ensure the output can cater
+for both 32-bit and also 64-bit addresses and registers.
+
+Also insert the proper docstring. Assume debugger will always be initialized. If unsure of anything or need more information, ask me.
+
+
+(5) Implementing the multi-line disassemble tool:
+`````````````````````````````````````````````````
+The API is described here:  
+
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/assembler-disassembler/
+
+Currently your solution for disassemble_at, disassembles only one line. 
+Try to disassembly multiple lines, something like this:
+
+ i = rip
+for _ in range(6):
+    ins = client.disassemble_at(i)
+    print(f'\t{i:016X}: {ins.instruction}')
+    i = i + ins.instr_size
+
+and the example output is:
+
+[+] Disassembling instructions
+        00007FF962D4C135: mov rax, 0x7FF961A698C0
+        00007FF962D4C13F: mov rdx, 0x401000
+        00007FF962D4C146: mov rcx, 0x7FF961A50000
+        00007FF962D4C150: lea rcx, ds:[rcx*2+0x04]
+        00007FF962D4C158: mov rbx, qword ptr gs:[0x0000000000000000]
+        00007FF962D4C161: mov rdi, 0x21CBEDC0000
+
+Create a new function called disassemble_smart(addr, num_lines) -> dict
+
+where num_lines is an integer of the number of lines to disassemble.
+
+The function should automatically detect proper instruction boundaries to ensure accurate disassembly even when the starting address might be in the middle of an instruction, and be able to automatically make proper alignment adjustments and must 
+work with both 32-bit and 64-bit programs.
+
+You may rename the function or the parameter names, or, even add more parameters as you see fit.
+If unsure of anything or need more information, ask me.
+
+(6) Implementing the assemble_at tool:
+`````````````````````````````````````
+[ attach/upload file mcp_automate_server.py]
+Refer to file. I am trying to implement the assemble_at(addr, instr) mcp tool.
+It is supposed to assemble a single instruction at the specified address.
+
+The API is described here:
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/assembler-disassembler/
+
+addr is an int:	The address to assemble at
+instr is a str: Instruction to assemble
+
+It returns:
+int or None:  The size of the assembled instruction, or None on failure
+
+It should work for both win32 and win64 binaries. Assume debugger is already initialized.
+Example usage from the API docs:
+
+i = rip
+i = i + debugger.assemble_at(i, 'mov rax, OutputDebugStringA') # Symbol
+i = i + debugger.assemble_at(i, 'mov rdx, 0x401000') # Constant
+i = i + debugger.assemble_at(i, 'mov rcx, my_cool_label') # Label
+i = i + debugger.assemble_at(i, 'lea rcx, [rcx * 2 + 4]') # Scale
+i = i + debugger.assemble_at(i, 'mov rbx, gs:[0]') # Segmentation
+
+Use the following functions from the file, as guides on how to implement the function:
+
+ read_str_from_memory
+ virt_query
+ memmap
+ write_memory
+ memset
+ disassemble_at
+ disassemble_smart
+
+If you are unsure of anything or need more information, ask me.
+
+
+(7) Implementing a tool to read AoB:  
+````````````````````````````````````
+[ attach/upload file mcp_automate_server.py ]  
+Refer to file. I want to make another tool called read_aob(addr, size) -> dict.
+It is the same as the tool read_memory(addr, size) -> dict:, except that it does not
+flip the bytes to account for little-endian. The purpose of it is to get an
+array of bytes (AoB) as a signature bytes so that we can reliably scan for the AoB later using
+findallmem via command_sync. For example, the read_aob will return an AoB, eg:
+
+74 1B 48 8D 15 C5 6A 3A 00
+
+which we can then use in command_sync() as findallmem 0x407810, "74 1B 48 8D 15 C5 6A 3A 00"
+
+Use the function read_memory as a guide for coding style. Insert proper docstring describing 
+parameters, return values, and behavior.  
+   - Must work with both x32 and x64 debuggers.  
+   - Assume debugger is initialized
+   - It must not flip to account for little-endian because we want to preserve its
+     byte sequence exactly as it appears in memory.
+
+If you are unsure of anything or need more information, ask me.
+
+(8) Debug control: run:
+``````````````````````
+[ attach/upload file mcp_automate_server.py ]  
+Refer to file. I want to make another mcp tool called run() that implements the api below as an mcp tool: 
+
+go(pass_exceptions=False, swallow_exceptions=False) 
+
+The API is described here: https://dariushoule.github.io/x64dbg-automate-pyclient/api/debug-control/ 
+
+It resumes the debugee. This method will block until the debugee is in the running state. 
+
+Parameters: 
+
+pass_exceptions type bool: Pass exceptions to the debugee 
+swallow_exceptions type bool: Swallow exceptions 
+
+Returns: bool True if successful, False otherwise 
+
+Must work with both x32 and x64 debuggers. 
+
+Use the following functions from mcp_automate_server.py as guides:  
+    read_str_from_memory
+    virt_query
+    memmap
+    write_memory
+    memset
+    disassemble_at
+
+Assume debugger is already initialized.
+Insert a proper docstring describing parameters, return values, and when to use. 
+If you are unsure of anything or need more information, ask me. 
+
+(9) Debug control: stepi:
+````````````````````````
+[ attach/upload file mcp_automate_server.py ]  
+Refer to file. I want to make another mcp tool called step_into that implements the api below as an mcp tool: 
+
+stepi(step_count=1, pass_exceptions=False, swallow_exceptions=False, wait_for_ready=True, wait_timeout=2)
+
+Before implementing it, be sure you read the API in the link below to understand the Parameters and Returns: 
+
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/debug-control/ 
+
+
+It must work with both x32 and x64 debuggers. 
+
+Use the following functions from mcp_automate_server.py as guides:  
+    read_str_from_memory
+    virt_query
+    memmap
+    write_memory
+    memset
+    disassemble_at
+
+Assume debugger is already initialized.
+Insert a proper docstring describing parameters, return values, and when to use.  
+If you are unsure of anything or need more information, ask me.
+
+(10) Debug control: stepo:
+``````````````````````````
+[ attach/upload file mcp_automate_server.py ]  
+Refer to file. I want to make another mcp tool called step_over that implements the api below as an mcp tool: 
+
+stepo(step_count=1, pass_exceptions=False, swallow_exceptions=False, wait_for_ready=True, wait_timeout=2)
+
+Before implementing it, be sure you read the API in the link below to understand the Parameters and Returns: 
+
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/debug-control/ 
+
+
+It must work with both x32 and x64 debuggers. 
+
+Use the following functions from mcp_automate_server.py as guides:  
+    read_str_from_memory
+    virt_query
+    memmap
+    write_memory
+    memset
+    disassemble_at
+    step_into
+
+Assume debugger is already initialized.
+Insert a proper docstring describing parameters, return values, and when to use.
+If you are unsure of anything or need more information, ask me.
+
+(11) Debug control: ret:
+``````````````````````````
+[ attach/upload file mcp_automate_server.py ]  
+Refer to file. I want to make another mcp tool called step_until_ret that implements the api below as an mcp tool: 
+
+ret(frames=1, wait_timeout=10)
+
+Before implementing it, be sure you read the API in the link below to understand the Parameters and Returns: 
+
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/debug-control/ 
+
+
+It must work with both x32 and x64 debuggers. 
+
+Use the following functions from mcp_automate_server.py as guides:  
+    read_str_from_memory
+    virt_query
+    memmap
+    write_memory
+    memset
+    disassemble_at
+    step_into
+    step_over
+
+Assume debugger is already initialized.
+Insert a proper docstring describing parameters, return values, and when to use.
+If you are unsure of anything or need more information, ask me.
+
+(12) Debug control: get_latest_debug_event:
+``````````````````````````````````````````
+[ attach/upload file mcp_automate_server.py ]  
+Refer to file. I want to make another mcp tool called get_latest_debug_event() that implements the api below as an mcp tool: 
+
+get_latest_debug_event() -> DbgEvent
+
+The API returns DbgEvent whose structure is:
+
+class DbgEvent():
+    def __init__(self, event_type: str, event_data: list[any]):
+        self.event_type = event_type
+
+        if event_type == EventType.EVENT_BREAKPOINT:
+            self.event_data = BreakpointEventData(
+                type=event_data[0],
+                addr=event_data[1],
+                enabled=event_data[2],
+                singleshoot=event_data[3],
+                active=event_data[4],
+                name=event_data[5],
+                mod=event_data[6],
+                slot=event_data[7],
+                typeEx=event_data[8],
+                hwSize=event_data[9],
+                hitCount=event_data[10],
+                fastResume=event_data[11],
+                silent=event_data[12],
+                breakCondition=event_data[13],
+                logText=event_data[14],
+                logCondition=event_data[15],
+                commandText=event_data[16],
+                commandCondition=event_data[17]
+            )
+        elif event_type == EventType.EVENT_SYSTEMBREAKPOINT:
+            self.event_data = SysBreakpointEventData(
+                reserved=event_data[0]
+            )
+        elif event_type == EventType.EVENT_CREATE_THREAD:
+            self.event_data = CreateThreadEventData(
+                dwThreadId=event_data[0],
+                lpThreadLocalBase=event_data[1],
+                lpStartAddress=event_data[2]
+            )
+        elif event_type == EventType.EVENT_EXIT_THREAD:
+            self.event_data = ExitThreadEventData(
+                dwThreadId=event_data[0],
+                dwExitCode=event_data[1]
+            )
+        elif event_type == EventType.EVENT_LOAD_DLL:
+            self.event_data = LoadDllEventData(
+                modname=event_data[0],
+                lpBaseOfDll=event_data[1]
+            )
+        elif event_type == EventType.EVENT_UNLOAD_DLL:
+            self.event_data = UnloadDllEventData(
+                lpBaseOfDll=event_data[0]
+            )
+        elif event_type == EventType.EVENT_OUTPUT_DEBUG_STRING:
+            self.event_data = OutputDebugStringEventData(
+                lpDebugStringData=event_data[0]
+            )
+        elif event_type == EventType.EVENT_EXCEPTION:
+            self.event_data = ExceptionEventData(
+                ExceptionCode=event_data[0],
+                ExceptionFlags=event_data[1],
+                ExceptionRecord=event_data[2],
+                ExceptionAddress=event_data[3],
+                NumberParameters=event_data[4],
+                ExceptionInformation=event_data[5],
+                dwFirstChance=event_data[6]
+            )
+        else:
+            raise ValueError(f"Unknown event type: {event_type}")
+
+And EventType structure is:
+
+  class EventType(StrEnum):
+      EVENT_BREAKPOINT = "EVENT_BREAKPOINT"
+      EVENT_SYSTEMBREAKPOINT = "EVENT_SYSTEMBREAKPOINT"
+      EVENT_CREATE_THREAD = "EVENT_CREATE_THREAD"
+      EVENT_EXIT_THREAD = "EVENT_EXIT_THREAD"
+      EVENT_LOAD_DLL = "EVENT_LOAD_DLL"
+      EVENT_UNLOAD_DLL = "EVENT_UNLOAD_DLL"
+      EVENT_OUTPUT_DEBUG_STRING = "EVENT_OUTPUT_DEBUG_STRING"
+      EVENT_EXCEPTION = "EVENT_EXCEPTION"
+
+
+
+The purpose of this tool is to get the latest debug event that occurred in the debugee.
+It must work with both x32 and x64 debuggers. 
+
+Use the following functions from mcp_automate_server.py as guides:  
+    read_str_from_memory
+    virt_query
+    memmap
+    write_memory
+    memset
+    disassemble_at
+    step_into
+    step_over
+
+Assume debugger is already initialized.
+Insert a proper docstring describing parameters, return values, and when to use.
+If you are unsure of anything or need more information, ask me.
+
+(13) Debug control: is_running:
+````````````````````````````````
+[ attach/upload file mcp_automate_server.py ]  
+Refer to file. I want to make another mcp tool called is_running that implements the api below as an mcp tool: 
+
+is_running() -> bool
+
+Before implementing it, be sure you read the API in the link below to understand the Parameters and Returns: 
+
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/debug-control/ 
+
+
+It must work with both x32 and x64 debuggers. 
+
+Use the following functions from mcp_automate_server.py as guides:  
+    read_str_from_memory
+    virt_query
+    memmap
+    write_memory
+    memset
+    disassemble_at
+    step_into
+    step_over
+    get_latest_debug_event
+
+Assume debugger is already initialized.
+Insert a proper docstring describing parameters, return values, and when to use.
+If you are unsure of anything or need more information, ask me.
+
+(14) Debug control: pause:
+``````````````````````````
+[ attach/upload file mcp_automate_server.py ]  
+Refer to file. I want to make another mcp tool called pause() that implements the api below as an mcp tool: 
+
+pause() -> bool
+
+Before implementing it, be sure you read the API in the link below to understand the Parameters and Returns: 
+
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/debug-control/ 
+
+
+It must work with both x32 and x64 debuggers. 
+
+Use the following functions from mcp_automate_server.py as guides:  
+    read_str_from_memory
+    virt_query
+    memmap
+    write_memory
+    memset
+    disassemble_at
+    step_into
+    step_over
+    get_latest_debug_event
+
+Assume debugger is already initialized.
+Insert a proper docstring describing parameters, return values, and when to use.
+If you are unsure of anything or need more information, ask me.
+
+(15) Breakpoints: get_breakpoints(bp_type)
+`````````````````````````````````````````
+[ attach/upload file mcp_automate_server.py ]  
+Refer to file. I want to make another mcp tool called get_breakpoints(bp_type) that implements the api below as an mcp tool: 
+
+get_breakpoints(bp_type) -> list[Breakpoint]
+
+Before implementing it, be sure you read the API in the link below to understand the Parameters and Returns: 
+
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/breakpoints/ 
+
+Feel free to change return type to dict or list whichever you think is preferable.
+
+BreakpointType structure is:
+
+    class BreakpointType(IntEnum):
+        BpNone = 0,
+        BpNormal = 1,
+        BpHardware = 2,
+        BpMemory = 4,
+        BpDll = 8,
+        BpException = 16
+
+Breakpoint structure is:
+
+    class Breakpoint(BaseModel):
+        type: BreakpointType
+        addr: int
+        enabled: bool
+        singleshoot: bool
+        active: bool
+        name: str
+        mod: str
+        slot: int
+        typeEx: int
+        hwSize: int
+        hitCount: int
+        fastResume: bool
+        silent: bool
+        breakCondition: str
+        logText: str
+        logCondition: str
+        commandText: str
+        commandCondition: str
+
+It must work with both x32 and x64 debuggers. 
+
+Use the following functions from mcp_automate_server.py as guides:  
+    read_str_from_memory
+    virt_query
+    memmap
+    write_memory
+    memset
+    disassemble_at
+    step_into
+    step_over
+    get_latest_debug_event
+    is_running
+
+Assume debugger is already initialized.
+Insert a proper docstring describing parameters, return values, and when to use.
+If you are unsure of anything or need more information, ask me.
+
+(16) Breakpoints: set_breakpoint
+````````````````````````````````
+[ attach/upload file mcp_automate_server.py ]  
+Refer to file. I want to make another mcp tool called set_breakpoint that implements the api below as an mcp tool: 
+
+set_breakpoint(address_or_symbol, name=None, bp_type=StandardBreakpointType.Short, singleshoot=False) -> bool
+
+Before implementing it, be sure you read the API in the link below to understand the Parameters and Returns: 
+
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/breakpoints/ 
+
+
+StandardBreakpointType structure is:
+
+    class StandardBreakpointType(StrEnum):
+        SingleShotInt3 = 'ss' # CC (SingleShoot)
+        Long = 'long' # CD03
+        Ud2 = 'ud2' # 0F0B
+        Short = 'short' # CC
+
+It must work with both x32 and x64 debuggers. 
+
+Use the following functions from mcp_automate_server.py as guides:  
+    read_str_from_memory
+    virt_query
+    memmap
+    write_memory
+    memset
+    disassemble_at
+    step_into
+    step_over
+    get_latest_debug_event
+    is_running
+
+Assume debugger is already initialized.
+Insert a proper docstring describing parameters, return values, and when to use.
+If you are unsure of anything or need more information, ask me.
+
+(17) Breakpoints: set_hardware_breakpoint
+`````````````````````````````````````````
+[ attach/upload file mcp_automate_server.py ]  
+Refer to file. I want to make another mcp tool called set_hardware_breakpoint that implements the api below as an mcp tool: 
+
+set_hardware_breakpoint(address_or_symbol, bp_type=HardwareBreakpointType.x, size=1) -> bool
+
+Before implementing it, be sure you read the API in the link below to understand the Parameters and Returns: 
+
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/breakpoints/ 
+
+It must work with both x32 and x64 debuggers. 
+
+The HardwareBreakpointType structure is:
+
+    class HardwareBreakpointType(StrEnum):
+        r = 'r'
+        w = 'w'
+        x = 'x'
+
+Use the following functions from mcp_automate_server.py as guides:  
+    read_str_from_memory
+    virt_query
+    memmap
+    write_memory
+    memset
+    disassemble_at
+    step_into
+    step_over
+    get_latest_debug_event
+    is_running
+    set_breakpoint
+
+Assume debugger is already initialized.
+Insert a proper docstring describing parameters, return values, and when to use.
+If you are unsure of anything or need more information, ask me.
+
+(18) Breakpoints: set_memory_breakpoint
+`````````````````````````````````````````
+[ attach/upload file mcp_automate_server.py ]  
+Refer to file. I want to make another mcp tool called set_memory_breakpoint that implements the api below as an mcp tool: 
+
+set_memory_breakpoint(address_or_symbol, bp_type=MemoryBreakpointType.a, singleshoot=False) -> bool
+
+Before implementing it, be sure you read the API in the link below to understand the Parameters and Returns: 
+
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/breakpoints/ 
+
+It must work with both x32 and x64 debuggers. 
+
+The MemoryBreakpointType structure is:
+
+    class MemoryBreakpointType(StrEnum):
+    r = 'r'
+    w = 'w'
+    x = 'x'
+    a = 'a'
+
+Use the following functions from mcp_automate_server.py as guides:  
+    read_str_from_memory
+    virt_query
+    memmap
+    write_memory
+    memset
+    disassemble_at
+    step_into
+    step_over
+    get_latest_debug_event
+    is_running
+    set_breakpoint
+    set_hardware_breakpoint
+
+Assume debugger is already initialized, no need to check for it.
+Insert a proper docstring describing parameters, return values, and when to use.
+If you are unsure of anything or need more information, ask me.
+
+
+(19) Breakpoints: clear_breakpoint
+`````````````````````````````````````````
+[ attach/upload file mcp_automate_server.py ]  
+Refer to file. I want to make another mcp tool called clear_breakpoint that implements the api below as an mcp tool: 
+
+clear_breakpoint(address_name_symbol_or_none=None) -> bool
+
+Before implementing it, be sure you read the API in the link below to understand the Parameters and Returns: 
+
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/breakpoints/ 
+
+It must work with both x32 and x64 debuggers. 
+Assume debugger is already initialized, no need to check for it.
+
+Use the following functions from mcp_automate_server.py as guides:  
+    read_str_from_memory
+    virt_query
+    memmap
+    write_memory
+    memset
+    disassemble_at
+    step_into
+    step_over
+    get_latest_debug_event
+    is_running
+    set_breakpoint
+    set_hardware_breakpoint
+    set_memory_breakpoint
+
+Insert a proper docstring describing parameters, return values, and when to use.
+If you are unsure of anything or need more information, ask me.
+
+(20) Breakpoints: clear_hardware_breakpoint
+`````````````````````````````````````````
+[ attach/upload file mcp_automate_server.py ]  
+Refer to file. I want to make another mcp tool called clear_hardware_breakpoint that implements the api below as an mcp tool: 
+
+clear_hardware_breakpoint(address_symbol_or_none=None) -> bool
+
+Before implementing it, be sure you read the API in the link below to understand the Parameters and Returns: 
+
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/breakpoints/ 
+
+It must work with both x32 and x64 debuggers. 
+Assume debugger is already initialized, no need to check for it.
+
+Use the following functions from mcp_automate_server.py as guides:  
+    read_str_from_memory
+    virt_query
+    memmap
+    write_memory
+    memset
+    disassemble_at
+    step_into
+    step_over
+    get_latest_debug_event
+    is_running
+    set_breakpoint
+    set_hardware_breakpoint
+    set_memory_breakpoint
+    clear_breakpoint
+
+Insert a proper docstring describing parameters, return values, and when to use.
+If you are unsure of anything or need more information, ask me.
+
+(21) Breakpoints: clear_memory_breakpoint
+`````````````````````````````````````````
+[ attach/upload file mcp_automate_server.py ]  
+Refer to file. I want to make another mcp tool called clear_memory_breakpoint that implements the api below as an mcp tool: 
+
+clear_memory_breakpoint(address_symbol_or_none=None) -> bool
+
+Before implementing it, be sure you read the API in the link below to understand the Parameters and Returns: 
+
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/breakpoints/ 
+
+It must work with both x32 and x64 debuggers. 
+Assume debugger is already initialized, no need to check for it.
+
+Use the following functions from mcp_automate_server.py as guides:  
+    read_str_from_memory
+    virt_query
+    memmap
+    write_memory
+    memset
+    disassemble_at
+    step_into
+    step_over
+    get_latest_debug_event
+    is_running
+    set_breakpoint
+    set_hardware_breakpoint
+    set_memory_breakpoint
+    clear_breakpoint
+    clear_hardware_breakpoint
+
+Insert a proper docstring describing parameters, return values, and when to use.
+If you are unsure of anything or need more information, ask me.
+
+(22) Breakpoints: toggle_breakpoint
+`````````````````````````````````````````
+[ attach/upload file mcp_automate_server.py ]  
+Refer to file. I want to make another mcp tool called toggle_breakpoint that implements the api below as an mcp tool: 
+
+toggle_breakpoint(address_name_symbol_or_none=None, on=True) -> bool
+
+Before implementing it, be sure you read the API in the link below to understand the Parameters and Returns: 
+
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/breakpoints/ 
+
+It must work with both x32 and x64 debuggers. 
+Assume debugger is already initialized, no need to check for it.
+
+Use the following functions from mcp_automate_server.py as guides:  
+    read_str_from_memory
+    virt_query
+    memmap
+    write_memory
+    memset
+    disassemble_at
+    step_into
+    step_over
+    get_latest_debug_event
+    is_running
+    set_breakpoint
+    set_hardware_breakpoint
+    set_memory_breakpoint
+    clear_breakpoint
+    clear_hardware_breakpoint
+    clear_memory_breakpoint
+
+Insert a proper docstring describing parameters, return values, and when to use.
+If you are unsure of anything or need more information, ask me.
+
+(23) Breakpoints: toggle_hardware_breakpoint
+`````````````````````````````````````````
+[ attach/upload file mcp_automate_server.py ]  
+Refer to file. I want to make another mcp tool called toggle_hardware_breakpoint that implements the api below as an mcp tool: 
+
+toggle_hardware_breakpoint(address_symbol_or_none=None, on=True) -> bool
+
+Before implementing it, be sure you read the API in the link below to understand the Parameters and Returns: 
+
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/breakpoints/ 
+
+It must work with both x32 and x64 debuggers. 
+Assume debugger is already initialized, no need to check for it.
+
+Use the following functions from mcp_automate_server.py as guides:  
+    read_str_from_memory
+    virt_query
+    memmap
+    write_memory
+    memset
+    disassemble_at
+    step_into
+    step_over
+    get_latest_debug_event
+    is_running
+    set_breakpoint
+    set_hardware_breakpoint
+    set_memory_breakpoint
+    clear_breakpoint
+    clear_hardware_breakpoint
+    clear_memory_breakpoint
+    toggle_breakpoint
+
+Insert a proper docstring describing parameters, return values, and when to use.
+If you are unsure of anything or need more information, ask me.
+
+
+(24) Breakpoints: toggle_memory_breakpoint
+`````````````````````````````````````````
+[ attach/upload file mcp_automate_server.py ]  
+Refer to file. I want to make another mcp tool called toggle_memory_breakpoint that implements the api below as an mcp tool: 
+
+toggle_memory_breakpoint(address_symbol_or_none=None, on=True) -> bool
+
+Before implementing it, be sure you read the API in the link below to understand the Parameters and Returns: 
+
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/breakpoints/ 
+
+It must work with both x32 and x64 debuggers. 
+Assume debugger is already initialized, no need to check for it.
+
+Use the following functions from mcp_automate_server.py as guides:  
+    read_str_from_memory
+    virt_query
+    memmap
+    write_memory
+    memset
+    disassemble_at
+    step_into
+    step_over
+    get_latest_debug_event
+    is_running
+    set_breakpoint
+    set_hardware_breakpoint
+    set_memory_breakpoint
+    clear_breakpoint
+    clear_hardware_breakpoint
+    clear_memory_breakpoint
+    toggle_breakpoint
+    toggle_hardware_breakpoint
+
+Insert a proper docstring describing parameters, return values, and when to use.
+If you are unsure of anything or need more information, ask me.
+
+(25) Annotations: set_comment_at
+`````````````````````````````
+[ attach/upload file mcp_automate_server.py ]  
+Refer to file. I want to make another mcp tool called set_comment_at that implements the api below as an mcp tool: 
+
+set_comment_at(address, text) -> bool
+
+Before implementing it, be sure you read the API in the link below to understand the Parameters and Returns: 
+
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/annotations/
+
+It must work with both x32 and x64 debuggers. 
+Assume debugger is already initialized, no need to check for it.
+
+Use the following functions from mcp_automate_server.py as guides:  
+    read_str_from_memory
+    virt_query
+    memmap
+    write_memory
+    memset
+    disassemble_at
+    step_into
+    step_over
+    get_latest_debug_event
+    is_running
+    set_breakpoint
+    set_hardware_breakpoint
+    set_memory_breakpoint
+    clear_breakpoint
+    clear_hardware_breakpoint
+    clear_memory_breakpoint
+    toggle_breakpoint
+    toggle_hardware_breakpoint
+    toggle_memory_breakpoint
+
+Insert a proper docstring describing parameters, return values, and when to use.
+If you are unsure of anything or need more information, ask me.
+
+(26) Annotations: del_comment_at
+`````````````````````````````
+[ attach/upload file mcp_automate_server.py ]  
+Refer to file. I want to make another mcp tool called del_comment_at that implements the api below as an mcp tool: 
+
+del_comment_at(address) -> bool
+
+Before implementing it, be sure you read the API in the link below to understand the Parameters and Returns: 
+
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/annotations/
+
+It must work with both x32 and x64 debuggers. 
+Assume debugger is already initialized, no need to check for it.
+
+Use the following functions from mcp_automate_server.py as guides:  
+    read_str_from_memory
+    virt_query
+    memmap
+    write_memory
+    memset
+    disassemble_at
+    step_into
+    step_over
+    get_latest_debug_event
+    is_running
+    set_breakpoint
+    set_hardware_breakpoint
+    set_memory_breakpoint
+    clear_breakpoint
+    clear_hardware_breakpoint
+    clear_memory_breakpoint
+    toggle_breakpoint
+    toggle_hardware_breakpoint
+    toggle_memory_breakpoint
+    set_comment_at
+
+Insert a proper docstring describing parameters, return values, and when to use.
+If you are unsure of anything or need more information, ask me.
+
+(27) Annotations: get_comment_at
+`````````````````````````````
+[ attach/upload file mcp_automate_server.py ]  
+Refer to file. I want to make another mcp tool called get_comment_at that implements the api below as an mcp tool: 
+
+get_comment_at(addr) -> str
+
+Before implementing it, be sure you read the API in the link below to understand the Parameters and Returns: 
+
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/annotations/
+
+It must work with both x32 and x64 debuggers. 
+Assume debugger is already initialized, no need to check for it.
+
+Use the following functions from mcp_automate_server.py as guides:  
+    read_str_from_memory
+    virt_query
+    memmap
+    write_memory
+    memset
+    disassemble_at
+    step_into
+    step_over
+    get_latest_debug_event
+    is_running
+    set_breakpoint
+    set_hardware_breakpoint
+    set_memory_breakpoint
+    clear_breakpoint
+    clear_hardware_breakpoint
+    clear_memory_breakpoint
+    toggle_breakpoint
+    toggle_hardware_breakpoint
+    toggle_memory_breakpoint
+    set_comment_at
+    del_comment_at
+
+Insert a proper docstring describing parameters, return values, and when to use.
+Do not use underlines in the docstring, instead use indents as per the precedents in file.
+If you are unsure of anything or need more information, ask me.
+
+(28) Annotations: set_label_at
+`````````````````````````````
+[ attach/upload file mcp_automate_server.py ]  
+Refer to file. I want to make another mcp tool called set_label_at that implements the api below as an mcp tool: 
+
+set_label_at(address, text) -> bool
+
+Before implementing it, be sure you read the API in the link below to understand the Parameters and Returns: 
+
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/annotations/
+
+It must work with both x32 and x64 debuggers. 
+Assume debugger is already initialized, no need to check for it.
+
+Use the following functions from mcp_automate_server.py as guides:  
+    
+    set_comment_at
+    del_comment_at
+    get_comment_at
+
+Insert a proper docstring describing parameters, return values, and when to use.
+Do not use underlines in the docstring, instead use indents as per the precedents in file.
+If you are unsure of anything or need more information, ask me.
+
+(29) Annotations: del_label_at
+`````````````````````````````
+[ attach/upload file mcp_automate_server.py ]  
+Refer to file. I want to make another mcp tool called del_label_at that implements the api below as an mcp tool: 
+
+del_label_at(address)-> bool
+
+Before implementing it, be sure you read the API in the link below to understand the Parameters and Returns: 
+
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/annotations/
+
+It must work with both x32 and x64 debuggers. 
+Assume debugger is already initialized, no need to check for it.
+
+Use the following functions from mcp_automate_server.py as guides:  
+    
+    set_comment_at
+    del_comment_at
+    get_comment_at
+    set_label_at
+
+Insert a proper docstring describing parameters, return values, and when to use.
+Do not use underlines in the docstring, instead use indents as per the precedents in file.
+If you are unsure of anything or need more information, ask me.
+
+(30) Annotations: get_label_at
+`````````````````````````````
+[ attach/upload file mcp_automate_server.py ]  
+Refer to file. I want to make another mcp tool called get_label_at that implements the api below as an mcp tool: 
+
+get_label_at(addr, segment_reg=SegmentReg.SegDefault) -> str
+
+Before implementing it, be sure you read the API in the link below to understand the Parameters and Returns: 
+
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/annotations/
+
+SegmentReg structure is:
+
+    class SegmentReg(IntEnum):
+    SegDefault = 0
+    SegEs = 1
+    SegDs = 2
+    SegFs = 3
+    SegGs = 4
+    SegCs = 5
+    SegSs = 6
+
+It must work with both x32 and x64 debuggers. 
+Assume debugger is already initialized, no need to check for it.
+
+Use the following functions from mcp_automate_server.py as guides:  
+    
+    set_comment_at
+    del_comment_at
+    get_comment_at
+    set_label_at
+    del_label_at
+
+Insert a proper docstring describing parameters, return values, and when to use.
+Do not use underlines in the docstring, instead use indents as per the precedents in file.
+If you are unsure of anything or need more information, ask me.
+
+
+(31) GUI: gui_refresh_views()
+``````````````````````````````````
+[ attach/upload file mcp_automate_server.py ]  
+Refer to file. I want to make another mcp tool called gui_refresh_views that implements the api below as an mcp tool: 
+
+gui_refresh_views() -> bool
+
+Before implementing it, be sure you read the API in the link below to understand the Parameters and Returns: 
+
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/gui/
+
+
+It must work with both x32 and x64 debuggers. 
+Assume debugger is already initialized, no need to check for it.
+
+Use the following functions from mcp_automate_server.py as guides:  
+    
+    set_comment_at
+    del_comment_at
+    get_comment_at
+    set_label_at
+    del_label_at
+    get_label_at
+    gui_show_reference_view
+
+Insert a proper docstring describing parameters, return values, and when to use.
+Do not use underlines in the docstring, instead use indents as per the precedents in file.
+If you are unsure of anything or need more information, ask me.
+
+(32) GUI: log(fmt_str)
+``````````````````````
+[ attach/upload file mcp_automate_server.py ]  
+Refer to file. I want to make another mcp tool called log(fmt_str) that implements the api below as an mcp tool: 
+
+log(fmt_str) -> int
+
+Before implementing it, be sure you read the API in the link below to understand the Parameters and Returns: 
+
+https://dariushoule.github.io/x64dbg-automate-pyclient/api/gui/
+
+
+It must work with both x32 and x64 debuggers. 
+Assume debugger is already initialized, no need to check for it.
+
+Use the following functions from mcp_automate_server.py as guides:  
+    
+    set_comment_at
+    del_comment_at
+    get_comment_at
+    set_label_at
+    del_label_at
+    get_label_at
+    gui_show_reference_view
+    gui_refresh_views
+
+Insert a proper docstring describing parameters, return values, and when to use.
+Do not use underlines in the docstring, instead use indents as per the precedents in file.
+If you are unsure of anything or need more information, ask me.
+
+

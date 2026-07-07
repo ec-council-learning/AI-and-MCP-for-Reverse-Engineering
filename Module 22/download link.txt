@@ -1,0 +1,3 @@
+frida-mcp download link:
+
+https://github.com/dnakov/frida-mcp

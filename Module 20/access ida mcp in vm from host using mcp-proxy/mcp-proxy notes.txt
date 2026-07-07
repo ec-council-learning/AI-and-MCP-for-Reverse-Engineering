@@ -1,0 +1,5 @@
+
+In cmd as adminstrator, do:  pip install mcp-proxy
+then:
+
+  mcp-proxy --host=0.0.0.0 --port=37788 -- python -m mcp_server_ida -v
